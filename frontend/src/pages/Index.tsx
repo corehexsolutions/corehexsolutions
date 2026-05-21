@@ -30,6 +30,7 @@ import ScrollCarousel from "@/components/ui/scroll-carousel";
 import Cards from "@/components/ui/Cards";
 import BgCards from "@/components/ui/Cards";
 import SplashCursor from "@/components/ui/SplashCursor";
+import { motion } from "framer-motion";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -107,20 +108,56 @@ export default function Index() {
   const cardsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!containerRef.current) return;
+
     const ctx = gsap.context(() => {
       const panels = gsap.utils.toArray<HTMLElement>(".stack-panel");
 
-      panels.forEach((panel, i) => {
+      // Better GPU rendering
+      gsap.set(panels, {
+        force3D: true,
+        willChange: "transform",
+      });
+
+      panels.forEach((panel, index) => {
         ScrollTrigger.create({
           trigger: panel,
+
+          // smoother pin timing
           start: "top top",
+
+          // prevents layout jumps
           pin: true,
-          pinSpacing: i === panels.length - 1,
+
+          // only last section keeps spacing
+          pinSpacing: index === panels.length - 1,
+
+          // smoother calculations
+          anticipatePin: 1,
+
+          // improves scroll performance
+          fastScrollEnd: true,
+
+          // reduces refresh calculations
+          invalidateOnRefresh: false,
+
+          // prevents mobile resize lag
+          ignoreMobileResize: true,
+
+          // smoother scrub feel
+          scrub: false,
         });
       });
+
+      // optimize refresh behavior
+      ScrollTrigger.sort();
+      ScrollTrigger.refresh();
     }, containerRef);
 
-    return () => ctx.revert();
+    return () => {
+      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      ctx.revert();
+    };
   }, []);
 
   useEffect(() => {
@@ -202,33 +239,107 @@ export default function Index() {
       </section>
 
       {/* Stats Section */}
-      <section className="relative z-10 -mt-16">
+      <section className="relative z-20 -mt-20 px-4">
+
         <div className="container-custom">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {stats.map((stat, index) => (
-              <div
-                key={stat.label}
-                className="bg-card rounded-2xl p-6 text-center shadow-soft border border-border hover-lift"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <div className="text-3xl md:text-4xl font-bold text-primary mb-1">
-                  <AnimatedCounter to={parseInt(stat.value)} duration={2} />
-                  <span>
-                    {stat.label === "Clients Served" ? "+" :
-                      stat.label === "Uptime Guarantee" ? ".9%" :
-                        stat.label === "Support Available" ? "/7" :
-                          stat.label === "Years Experience" ? "+" : ""
+
+          {/* MAIN WRAPPER */}
+          <div className="relative overflow-hidden rounded-[32px] border border-white/10 bg-[#0E1625]/80 backdrop-blur-2xl shadow-[0_20px_80px_rgba(0,0,0,0.35)]">
+
+            {/* GRADIENT BG */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.14),transparent_32%),radial-gradient(circle_at_bottom_right,rgba(96,165,250,0.10),transparent_34%)]" />
+
+            {/* TOP GLOW */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[320px] h-[140px] bg-primary/10 blur-3xl rounded-full" />
+
+            {/* GRID */}
+            <div className="relative z-10 grid grid-cols-2 lg:grid-cols-4">
+
+              {stats.map((stat, index) => (
+                <motion.div
+                  key={stat.label}
+                  initial={{
+                    opacity: 0,
+                    y: 40,
+                  }}
+                  whileInView={{
+                    opacity: 1,
+                    y: 0,
+                  }}
+                  viewport={{
+                    once: true,
+                    amount: 0.4,
+                  }}
+                  transition={{
+                    duration: 0.8,
+                    delay: index * 0.08,
+                    ease: [0.22, 1, 0.36, 1],
+                  }}
+                  whileHover={{
+                    y: -6,
+                  }}
+                  className={`
+              relative group px-6 py-10 md:px-10 md:py-12
+              transition-all duration-500
+              ${index !== stats.length - 1
+                      ? "border-b lg:border-b-0 lg:border-r border-white/10"
+                      : ""
                     }
-                  </span>
-                </div>
-                <div className="text-muted-foreground text-sm font-medium">
-                  {stat.label}
-                </div>
-              </div>
-            ))}
+            `}
+                >
+
+                  {/* HOVER GLOW */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.10),transparent_70%)]" />
+
+                  {/* TOP LINE */}
+                  <div className="absolute top-0 left-1/2 h-[2px] w-0 -translate-x-1/2 bg-gradient-to-r from-transparent via-primary to-transparent transition-all duration-500 group-hover:w-24" />
+
+                  {/* CONTENT */}
+                  <div className="relative z-10">
+
+                    {/* VALUE */}
+                    <div className="flex items-end justify-center gap-1 mb-3">
+
+                      <h3 className="text-4xl md:text-5xl font-bold tracking-tight leading-none bg-gradient-to-b from-white to-white/75 bg-clip-text text-transparent">
+
+                        <AnimatedCounter
+                          to={parseInt(stat.value)}
+                          duration={2}
+                        />
+
+                      </h3>
+
+                      <span className="bg-gradient-to-r from-primary to-blue-300 bg-clip-text text-transparent text-2xl md:text-3xl font-semibold leading-none">
+
+                        {stat.label === "Clients Served"
+                          ? "+"
+                          : stat.label === "Uptime Guarantee"
+                            ? ".9%"
+                            : stat.label === "Support Available"
+                              ? "/7"
+                              : stat.label === "Years Experience"
+                                ? "+"
+                                : ""}
+
+                      </span>
+
+                    </div>
+
+                    {/* LABEL */}
+                    <p className="text-sm md:text-[15px] text-center text-gray-400 font-medium tracking-wide">
+                      {stat.label}
+                    </p>
+
+                  </div>
+
+                </motion.div>
+              ))}
+
+            </div>
           </div>
         </div>
       </section>
+
       {/* <section className="stack-panel relative z-10 min-h-screen section-padding bg-white"> */}
       <ScrollCarousel />
       {/* </section> */}
@@ -556,158 +667,7 @@ export default function Index() {
       </section>
 
       {/* FOOTER */}
-      <footer className="relative z-10 bg-[#030712] border-t border-white/10 overflow-hidden">
-
-        {/* BG EFFECT */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute bottom-[-120px] left-1/3 w-[380px] h-[380px] bg-primary/10 blur-[140px] rounded-full" />
-        </div>
-
-        <div className="container-custom relative z-10 pt-20 pb-10">
-
-          {/* TOP */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-14">
-
-            {/* BRAND */}
-            <div>
-
-              <h2 className="text-3xl font-bold text-white mb-5">
-                Corehex
-                <span className="text-primary"> Solutions</span>
-              </h2>
-
-              <p className="text-gray-400 text-sm leading-relaxed mb-6">
-                Delivering modern IT infrastructure, cybersecurity,
-                cloud solutions, and software development services
-                for businesses across industries.
-              </p>
-
-              {/* SOCIAL */}
-              <div className="flex items-center gap-4">
-
-                {["in", "ig", "tw"].map((item, index) => (
-                  <div
-                    key={index}
-                    className="w-11 h-11 rounded-xl border border-white/10 bg-white/[0.03] flex items-center justify-center text-sm text-gray-300 hover:text-white hover:border-primary/30 hover:bg-primary/10 transition-all duration-300 cursor-pointer"
-                  >
-                    {item}
-                  </div>
-                ))}
-
-              </div>
-            </div>
-
-            {/* SERVICES */}
-            <div>
-              <h3 className="text-white text-lg font-semibold mb-6">
-                Services
-              </h3>
-
-              <ul className="space-y-4 text-sm text-gray-400">
-
-                {[
-                  "IT Infrastructure",
-                  "Cybersecurity",
-                  "Cloud Solutions",
-                  "Software Development",
-                  "IT Consulting",
-                ].map((item, index) => (
-                  <li
-                    key={index}
-                    className="hover:text-primary transition-colors duration-300 cursor-pointer"
-                  >
-                    {item}
-                  </li>
-                ))}
-
-              </ul>
-            </div>
-
-            {/* COMPANY */}
-            <div>
-              <h3 className="text-white text-lg font-semibold mb-6">
-                Company
-              </h3>
-
-              <ul className="space-y-4 text-sm text-gray-400">
-
-                {[
-                  "About Us",
-                  "Projects",
-                  "Testimonials",
-                  "Contact",
-                  "Support",
-                ].map((item, index) => (
-                  <li
-                    key={index}
-                    className="hover:text-primary transition-colors duration-300 cursor-pointer"
-                  >
-                    {item}
-                  </li>
-                ))}
-
-              </ul>
-            </div>
-
-            {/* CONTACT */}
-            <div>
-              <h3 className="text-white text-lg font-semibold mb-6">
-                Contact
-              </h3>
-
-              <div className="space-y-5 text-sm text-gray-400">
-
-                <div>
-                  <p className="text-white mb-1 font-medium">
-                    Phone
-                  </p>
-                  <p>+91 9879300929</p>
-                </div>
-
-                <div>
-                  <p className="text-white mb-1 font-medium">
-                    Email
-                  </p>
-                  <p>contact@corehexsolutions.com</p>
-                </div>
-
-                <div>
-                  <p className="text-white mb-1 font-medium">
-                    Availability
-                  </p>
-                  <p>24/7 Technical Support</p>
-                </div>
-
-              </div>
-            </div>
-
-          </div>
-
-          {/* DIVIDER */}
-          <div className="mt-16 mb-8 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-
-          {/* BOTTOM */}
-          <div className="flex flex-col md:flex-row items-center justify-between gap-5">
-
-            <p className="text-gray-500 text-sm text-center md:text-left">
-              © 2026 Corehex Solutions. All rights reserved.
-            </p>
-
-            <div className="flex items-center gap-6 text-sm text-gray-500">
-
-              <span className="hover:text-primary transition-colors duration-300 cursor-pointer">
-                Privacy Policy
-              </span>
-
-              <span className="hover:text-primary transition-colors duration-300 cursor-pointer">
-                Terms & Conditions
-              </span>
-
-            </div>
-
-          </div>
-        </div>
-      </footer>
+      <Footer/>
     </div>
   );
 }
