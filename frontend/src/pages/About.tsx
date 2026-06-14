@@ -16,59 +16,7 @@ export default function About() {
   const containerRef =
     useRef<HTMLDivElement | null>(null);
 
- 
-  useEffect(() => {
-    if (!containerRef.current) return;
 
-    const ctx = gsap.context(() => {
-      const panels = gsap.utils.toArray<HTMLElement>(".stack-panel");
-
-      // Better GPU rendering
-      gsap.set(panels, {
-        force3D: true,
-        willChange: "transform",
-      });
-
-      panels.forEach((panel, index) => {
-        ScrollTrigger.create({
-          trigger: panel,
-
-          // smoother pin timing
-          start: "top top",
-
-          // prevents layout jumps
-          pin: true,
-
-          // only last section keeps spacing
-          pinSpacing: index === panels.length - 1,
-
-          // smoother calculations
-          anticipatePin: 1,
-
-          // improves scroll performance
-          fastScrollEnd: true,
-
-          // reduces refresh calculations
-          invalidateOnRefresh: false,
-
-          // prevents mobile resize lag
-          ignoreMobileResize: true,
-
-          // smoother scrub feel
-          scrub: false,
-        });
-      });
-
-      // optimize refresh behavior
-      ScrollTrigger.sort();
-      ScrollTrigger.refresh();
-    }, containerRef);
-
-    return () => {
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-      ctx.revert();
-    };
-  }, []);
 
   return (
     <div
@@ -109,7 +57,7 @@ export default function About() {
       </section>
 
       {/* WHO WE ARE */}
-      <section className="stack-panel relative z-30 min-h-screen flex items-center overflow-hidden bg-[#070b18] border-t border-white/[0.03]">
+      <section className="stack-panel relative min-h-screen flex items-center overflow-hidden bg-[#070b18] border-t border-white/[0.03]">
         <div className="absolute inset-0 bg-gradient-to-b from-white/[0.015] to-transparent" />
 
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_left,rgba(59,130,246,0.10),transparent_35%)]" />
@@ -170,7 +118,7 @@ export default function About() {
       </section>
 
       {/* FOUNDER */}
-      {/* <section className="stack-panel relative z-30 min-h-screen flex items-center overflow-hidden bg-[#08101c] border-t border-white/[0.03]">
+      {/* <section className="stack-panel relative min-h-screen flex items-center overflow-hidden bg-[#08101c] border-t border-white/[0.03]">
         <div className="absolute inset-0 bg-gradient-to-b from-white/[0.015] to-transparent" />
 
         <div className="absolute top-[-100px] right-[-100px] w-[500px] h-[500px] bg-primary/10 blur-[160px] rounded-full" />
@@ -241,7 +189,7 @@ export default function About() {
       </section> */}
 
       {/* CTA */}
-      <section className="stack-panel relative z-30 min-h-screen flex items-center overflow-hidden bg-[#070d18] border-t border-white/[0.03]">
+      <section className="stack-panel relative min-h-screen flex items-center overflow-hidden bg-[#070d18] border-t border-white/[0.03]">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.16),transparent_45%)]" />
 
         <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-[size:72px_72px]" />
