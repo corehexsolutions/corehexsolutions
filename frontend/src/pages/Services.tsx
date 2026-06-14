@@ -16,6 +16,7 @@ import {
   Wifi,
   ArrowRight,
   Phone,
+  Code,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
@@ -27,6 +28,7 @@ interface ServiceItem {
   icon: LucideIcon;
   title: string;
   description: string;
+  slug?: string;
 }
 
 interface ServiceCategory {
@@ -46,21 +48,32 @@ const serviceCategories: ServiceCategory[] = [
         icon: Server,
         title: "Hardware Support",
         description: "Comprehensive hardware maintenance, repair, and upgrades for all your IT equipment including servers, workstations, and peripherals.",
+        slug: "it-infrastructure",
       },
       {
         icon: Headphones,
         title: "Help Desk Support",
         description: "24/7 technical support with quick response times to resolve issues and minimize downtime for your team.",
+        slug: "it-support",
       },
       {
         icon: Settings,
         title: "IT Consulting",
         description: "Strategic technology consulting to align your IT infrastructure with business goals and drive digital transformation.",
+        slug: "it-consulting",
       },
       {
         icon: Building2,
         title: "IT Infrastructure Management",
         description: "End-to-end management of your IT infrastructure including servers, networks, and cloud resources.",
+        slug: "it-infrastructure",
+      },
+      {
+        icon: Code,
+        title: "Software Development",
+        description:
+          "Custom web applications, mobile apps, business systems, and software solutions designed to streamline operations, automate workflows, and support business growth.",
+        slug: "software-development",
       },
     ],
   },
@@ -73,26 +86,31 @@ const serviceCategories: ServiceCategory[] = [
         icon: Shield,
         title: "Network Security",
         description: "Comprehensive network security solutions including firewalls, intrusion detection, and vulnerability assessments.",
+        slug: "cybersecurity",
       },
       {
         icon: Lock,
         title: "Cybersecurity",
         description: "Advanced cybersecurity measures to protect against malware, ransomware, phishing, and other digital threats.",
+        slug: "cybersecurity",
       },
       {
         icon: Network,
         title: "Endpoint Security",
         description: "Secure all endpoints including laptops, desktops, and mobile devices with advanced protection solutions.",
+        slug: "cybersecurity",
       },
       {
         icon: Camera,
         title: "CCTV Installation",
         description: "Professional CCTV system design, installation, and monitoring for comprehensive physical security.",
+        // no slug — no detail page yet
       },
       {
         icon: Eye,
         title: "Network Monitoring",
         description: "Proactive 24/7 network monitoring to identify and resolve issues before they impact your business.",
+        slug: "network-management",
       },
     ],
   },
@@ -105,26 +123,31 @@ const serviceCategories: ServiceCategory[] = [
         icon: Database,
         title: "Data Management",
         description: "Comprehensive data management solutions including storage, organization, and accessibility optimization.",
+        slug: "data-solutions",
       },
       {
         icon: CloudCog,
         title: "Backup and Disaster Recovery",
         description: "Automated backup solutions and disaster recovery planning to ensure business continuity.",
+        slug: "data-solutions",
       },
       {
         icon: BarChart3,
         title: "Data Analytics",
         description: "Transform raw data into actionable insights with advanced analytics and visualization tools.",
+        slug: "data-solutions",
       },
       {
         icon: LineChart,
         title: "Business Intelligence",
         description: "BI solutions to help you make data-driven decisions and gain competitive advantage.",
+        slug: "data-solutions",
       },
       {
         icon: Wifi,
         title: "Managed Network Services",
         description: "Fully managed network services including setup, maintenance, and optimization for peak performance.",
+        slug: "network-management",
       },
     ],
   },
@@ -167,22 +190,43 @@ export default function Services() {
               description={category.subtitle}
             />
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {category.services.map((service, index) => (
-                <div
-                  key={service.title}
-                  className="group p-6 md:p-8 rounded-2xl bg-card border border-border hover-lift hover-glow transition-all duration-300"
-                >
-                  <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-5 group-hover:bg-primary group-hover:scale-110 transition-all duration-300">
-                    <service.icon className="w-7 h-7 text-primary group-hover:text-primary-foreground transition-colors" />
+              {category.services.map((service) => {
+                const cardClass =
+                  "group p-6 md:p-8 rounded-2xl bg-card border border-border hover-lift hover-glow transition-all duration-300";
+
+                const cardContent = (
+                  <>
+                    <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-5 group-hover:bg-primary group-hover:scale-110 transition-all duration-300">
+                      <service.icon className="w-7 h-7 text-primary group-hover:text-primary-foreground transition-colors" />
+                    </div>
+                    <h3 className="font-bold text-lg text-foreground mb-3 group-hover:text-primary transition-colors">
+                      {service.title}
+                    </h3>
+                    <p className="text-muted-foreground text-sm leading-relaxed">
+                      {service.description}
+                    </p>
+                    {service.slug && (
+                      <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        Learn more <ArrowRight className="w-3.5 h-3.5" />
+                      </div>
+                    )}
+                  </>
+                );
+
+                return service.slug ? (
+                  <Link
+                    key={service.title}
+                    to={`/services/${service.slug}`}
+                    className={cardClass}
+                  >
+                    {cardContent}
+                  </Link>
+                ) : (
+                  <div key={service.title} className={cardClass}>
+                    {cardContent}
                   </div>
-                  <h3 className="font-bold text-lg text-foreground mb-3 group-hover:text-primary transition-colors">
-                    {service.title}
-                  </h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    {service.description}
-                  </p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>
